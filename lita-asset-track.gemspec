@@ -1,7 +1,7 @@
 Gem::Specification.new do |spec|
   spec.name = "lita-asset-track"
-  spec.version = "0.0.0"
-  spec.authors = ["me"]
+  spec.version = "0.0.1"
+  spec.authors = ["Nick Browne"]
 
   spec.summary = %q{A lita plugin that reports on asset sizes to librato}
   spec.description = %q{A lita plugin that reports on asset sizes to librato}
