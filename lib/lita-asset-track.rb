@@ -20,27 +20,31 @@ module Lita
 
       def start_timer(payload)
         every(MINUTE) do
-          Lita::Timing::RateLimit.new("lita-asset-track", redis).once_every(HOUR) do
-            redis.sscan_each(MANIFEST_SET_KEY).map { |manifest_url|
-              URI(manifest_url)
-            }.each { |manifest_uri|
-              manifest_json = JSON.parse Net::HTTP.get(manifest_uri)
+          begin
+            Lita::Timing::RateLimit.new("lita-asset-track", redis).once_every(HOUR) do
+              redis.sscan_each(MANIFEST_SET_KEY).map { |manifest_url|
+                URI(manifest_url)
+              }.each { |manifest_uri|
+                manifest_json = JSON.parse Net::HTTP.get(manifest_uri)
 
-              manifest_json.select { |k, v|
-                k.match /\.(#{EXTENSIONS.join("|")})$/
-              }.map { |asset_name, asset_path|
-                asset_uri = determine_asset_uri(manifest_uri, asset_path)
+                manifest_json.select { |k, v|
+                  k.match /\.(#{EXTENSIONS.join("|")})$/
+                }.map { |asset_name, asset_path|
+                  asset_uri = determine_asset_uri(manifest_uri, asset_path)
 
-                Net::HTTP.start(asset_uri.host, asset_uri.port) { |http|
-                  robot.trigger(:asset_track_size,
-                    host: manifest_uri.host,
-                    asset: asset_name,
-                    bytes: bytes(http, asset_uri.path),
-                    bytes_gzip: bytes_gzip(http, asset_uri.path),
-                  )
+                  Net::HTTP.start(asset_uri.host, asset_uri.port) { |http|
+                    robot.trigger(:asset_track_size,
+                      host: manifest_uri.host,
+                      asset: asset_name,
+                      bytes: bytes(http, asset_uri.path),
+                      bytes_gzip: bytes_gzip(http, asset_uri.path),
+                    )
+                  }
                 }
               }
-            }
+            end
+          rescue StandardError => e
+            $stderr.puts "Error in timer loop: #{e.class} #{e.message} #{e.backtrace.first}"
           end
         end
       end
