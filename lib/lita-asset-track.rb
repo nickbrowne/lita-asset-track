@@ -32,8 +32,12 @@ module Lita
                 asset_uri = determine_asset_uri(manifest_uri, asset_path)
 
                 Net::HTTP.start(asset_uri.host, asset_uri.port) { |http|
-                  bytes = http.head(asset_uri.path)["content-length"]
-                  robot.trigger(:asset_track_size, host: manifest_uri.host, asset: asset_name, size: bytes)
+                  robot.trigger(:asset_track_size,
+                    host: manifest_uri.host,
+                    asset: asset_name,
+                    bytes: bytes(http, asset_uri.path),
+                    bytes_gzip: bytes_gzip(http, asset_uri.path),
+                  )
                 }
               }
             }
@@ -87,6 +91,14 @@ module Lita
             path: asset_path
           })
         end
+      end
+
+      def bytes(http, path)
+        http.head(path)["content-length"]
+      end
+
+      def bytes_gzip(http, path)
+        http.head(path, "accept-encoding" => "gzip")["content-length"]
       end
 
       Lita.register_handler(self)

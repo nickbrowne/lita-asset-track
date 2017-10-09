@@ -16,7 +16,8 @@ Set up an event handler.
 on(:asset_track_size) do |payload|
   puts payload[:host]
   puts payload[:asset]
-  puts payload[:size]
+  puts payload[:bytes]
+  puts payload[:bytes_gzip]
 end
 ```
 
