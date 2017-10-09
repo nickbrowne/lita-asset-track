@@ -24,7 +24,7 @@ module Lita
             Lita::Timing::RateLimit.new("lita-asset-track", redis).once_every(HOUR) do
               redis.sscan_each(MANIFEST_SET_KEY).map { |manifest_url|
                 URI(manifest_url).tap { |uri|
-                  uri.query = URI.encode_www_form("t" => Time.now.to_i)
+                  uri.query = URI.encode_www_form("t" => ::Time.now.to_i)
                 }
               }.each { |manifest_uri|
                 manifest_json = JSON.parse Net::HTTP.get(manifest_uri)
