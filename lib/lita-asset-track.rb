@@ -91,11 +91,7 @@ module Lita
         if asset_path =~ URI::regexp
           URI(asset_path)
         else
-          URI::HTTP.build({
-            host: manifest_uri.host,
-            scheme: manifest_uri.scheme,
-            path: asset_path
-          })
+          manifest_uri.dup.tap { |uri| uri.path = asset_path }
         end
       end
 
