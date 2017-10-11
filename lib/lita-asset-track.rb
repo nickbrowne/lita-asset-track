@@ -34,7 +34,7 @@ module Lita
                 }.map { |asset_name, asset_path|
                   asset_uri = determine_asset_uri(manifest_uri, asset_path)
 
-                  Net::HTTP.start(asset_uri.host, asset_uri.port) { |http|
+                  Net::HTTP.start(asset_uri.host, asset_uri.port, use_ssl: asset_uri.scheme == "https") { |http|
                     robot.trigger(:asset_track_size,
                       host: manifest_uri.host,
                       asset: asset_name,
